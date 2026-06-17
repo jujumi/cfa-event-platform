@@ -160,3 +160,18 @@ After coding, respond briefly with:
 - next step.
 
 Do not paste long code unless requested.
+
+## Small issue handling
+
+For small build, lint, install or configuration issues, do not attempt an automatic fix unless explicitly asked.
+
+Instead:
+
+- stop after diagnosis;
+- explain the useful error briefly;
+- identify the likely file or cause;
+- do not suggest fix unless asked, but indicate where to find the error log
+- wait for the user to confirm before editing.
+
+The user may choose to fix small issues manually with ChatGPT to save Codex tokens.
+
