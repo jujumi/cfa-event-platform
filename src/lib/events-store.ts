@@ -15,6 +15,11 @@ export type StoredEvent = {
   priority: string
   mainGoal: string | null
   notes: string | null
+  budgetEstimated: number | null
+  budgetNotes: string | null
+  participantsIfir: number | null
+  participantsSport: number | null
+  reportStatus: string
   createdAt: Date
   updatedAt: Date
 }
@@ -32,6 +37,11 @@ type StoredEventRow = {
   priority: string
   mainGoal: string | null
   notes: string | null
+  budgetEstimated: number | null
+  budgetNotes: string | null
+  participantsIfir: number | null
+  participantsSport: number | null
+  reportStatus: string
   createdAt: string
   updatedAt: string
 }
@@ -52,7 +62,7 @@ export function listEvents() {
   const database = getDatabase()
   const rows = database
     .prepare(
-      `SELECT id, title, eventType, cfaScope, status, startDate, endDate, location, owner, priority, mainGoal, notes, createdAt, updatedAt
+      `SELECT id, title, eventType, cfaScope, status, startDate, endDate, location, owner, priority, mainGoal, notes, budgetEstimated, budgetNotes, participantsIfir, participantsSport, reportStatus, createdAt, updatedAt
        FROM "Event"
        ORDER BY startDate ASC, createdAt DESC`
     )
@@ -73,6 +83,11 @@ export function createEventRecord(input: {
   priority: string
   mainGoal: string | null
   notes: string | null
+  budgetEstimated: number | null
+  budgetNotes: string | null
+  participantsIfir: number | null
+  participantsSport: number | null
+  reportStatus: string
 }) {
   const database = getDatabase()
   const now = new Date().toISOString()
@@ -80,9 +95,9 @@ export function createEventRecord(input: {
   database
     .prepare(
       `INSERT INTO "Event" (
-        id, title, eventType, cfaScope, status, startDate, endDate, location, owner, priority, mainGoal, notes, createdAt, updatedAt
+        id, title, eventType, cfaScope, status, startDate, endDate, location, owner, priority, mainGoal, notes, budgetEstimated, budgetNotes, participantsIfir, participantsSport, reportStatus, createdAt, updatedAt
       ) VALUES (
-        ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+        ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
       )`
     )
     .run(
@@ -98,6 +113,11 @@ export function createEventRecord(input: {
       input.priority,
       input.mainGoal,
       input.notes,
+      input.budgetEstimated,
+      input.budgetNotes,
+      input.participantsIfir,
+      input.participantsSport,
+      input.reportStatus,
       now,
       now
     )

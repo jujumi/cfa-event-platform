@@ -47,21 +47,32 @@ enum EventPriority {
   URGENT
 }
 
+enum EventReportStatus {
+  PAS_FAIT
+  EN_COURS
+  FAIT
+}
+
 model Event {
-  id        String        @id @default(cuid())
-  title     String
-  eventType EventType
-  cfaScope  CfaScope
-  status    EventStatus
-  startDate DateTime
-  endDate   DateTime?
-  location  String?
-  owner     String?
-  priority  EventPriority @default(MEDIUM)
-  mainGoal  String?
-  notes     String?
-  createdAt DateTime      @default(now())
-  updatedAt DateTime      @updatedAt
+  id                String            @id @default(cuid())
+  title             String
+  eventType         EventType
+  cfaScope          CfaScope
+  status            EventStatus
+  startDate         DateTime
+  endDate           DateTime?
+  location          String?
+  owner             String?
+  priority          EventPriority     @default(MEDIUM)
+  mainGoal          String?
+  notes             String?
+  budgetEstimated   Float?
+  budgetNotes       String?
+  participantsIfir  Int?
+  participantsSport Int?
+  reportStatus      EventReportStatus @default(PAS_FAIT)
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
 
   @@index([startDate])
   @@index([status])
