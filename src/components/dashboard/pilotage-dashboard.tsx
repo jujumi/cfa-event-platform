@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import {
   AlertCircle,
   BarChart3,
@@ -30,7 +31,7 @@ import {
   dashboardRoiMetrics,
   dashboardSpendSplit,
   dashboardUpcomingEvents,
-  type DashboardKpiIcon,
+type DashboardKpiIcon,
 } from "@/components/dashboard/pilotage-dashboard-data"
 import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
@@ -54,16 +55,16 @@ import {
 } from "@/components/ui/table"
 
 const navigation = [
-  { label: "Dashboard", icon: LayoutDashboard, current: true },
-  { label: "Evenements", icon: CalendarDays },
-  { label: "Documents", icon: FolderOpen },
-  { label: "PLV / Kits", icon: ClipboardList },
-  { label: "Formations", icon: GraduationCap },
-  { label: "Leads", icon: Users },
-  { label: "Landing pages", icon: Megaphone },
-  { label: "Reporting", icon: BarChart3 },
-  { label: "Parametres", icon: Settings },
-  { label: "Aide", icon: CircleHelp },
+  { label: "Dashboard", href: "/", icon: LayoutDashboard, current: true },
+  { label: "Evenements", href: "/evenements", icon: CalendarDays },
+  { label: "Documents", href: "/documents", icon: FolderOpen },
+  { label: "PLV / Kits", href: "/plv-kits", icon: ClipboardList },
+  { label: "Formations", href: "/formations", icon: GraduationCap },
+  { label: "Leads", href: "/leads", icon: Users },
+  { label: "Landing pages", href: "/landing-pages", icon: Megaphone },
+  { label: "Reporting", href: "/reporting", icon: BarChart3 },
+  { label: "Parametres", href: "/parametres", icon: Settings },
+  { label: "Aide", href: "/aide", icon: CircleHelp },
 ]
 
 const kpiIcons: Record<DashboardKpiIcon, typeof AlertCircle> = {
@@ -172,8 +173,8 @@ function DashboardSidebar({ className }: { className?: string }) {
 
             return (
               <li key={item.label}>
-                <a
-                  href="#"
+                <Link
+                  href={item.href}
                   className={cn(
                     "flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm transition-colors",
                     item.current
@@ -183,7 +184,7 @@ function DashboardSidebar({ className }: { className?: string }) {
                 >
                   <Icon className="size-4" />
                   <span>{item.label}</span>
-                </a>
+                </Link>
               </li>
             )
           })}

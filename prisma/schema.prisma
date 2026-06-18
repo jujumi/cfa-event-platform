@@ -11,3 +11,58 @@ generator client {
 datasource db {
   provider = "sqlite"
 }
+
+enum CfaScope {
+  IFIR
+  SPORT
+  BOTH
+}
+
+enum EventType {
+  SALON
+  JPO
+  FORUM
+  WEBINAIRE
+  PARTENAIRE
+  INTERNE
+  AUTRE
+}
+
+enum EventStatus {
+  VEILLE
+  A_ARBITRER
+  DEVIS_DEMANDE
+  DEVIS_RECU
+  VALIDE
+  INSCRIT
+  A_PREPARER
+  TERMINE
+  BILAN_A_FAIRE
+}
+
+enum EventPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+model Event {
+  id        String        @id @default(cuid())
+  title     String
+  eventType EventType
+  cfaScope  CfaScope
+  status    EventStatus
+  startDate DateTime
+  endDate   DateTime?
+  location  String?
+  owner     String?
+  priority  EventPriority @default(MEDIUM)
+  mainGoal  String?
+  notes     String?
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  @@index([startDate])
+  @@index([status])
+}
