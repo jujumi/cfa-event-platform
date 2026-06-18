@@ -60,6 +60,7 @@ model Event {
   cfaScope          CfaScope
   status            EventStatus
   startDate         DateTime
+  durationDays      Float?            @default(1)
   endDate           DateTime?
   location          String?
   owner             String?

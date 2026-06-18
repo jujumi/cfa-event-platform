@@ -9,6 +9,7 @@ export type StoredEvent = {
   cfaScope: string
   status: string
   startDate: Date
+  durationDays: number | null
   endDate: Date | null
   location: string | null
   owner: string | null
@@ -31,6 +32,7 @@ type StoredEventRow = {
   cfaScope: string
   status: string
   startDate: string
+  durationDays: number | null
   endDate: string | null
   location: string | null
   owner: string | null
@@ -62,7 +64,7 @@ export function listEvents() {
   const database = getDatabase()
   const rows = database
     .prepare(
-      `SELECT id, title, eventType, cfaScope, status, startDate, endDate, location, owner, priority, mainGoal, notes, budgetEstimated, budgetNotes, participantsIfir, participantsSport, reportStatus, createdAt, updatedAt
+      `SELECT id, title, eventType, cfaScope, status, startDate, durationDays, endDate, location, owner, priority, mainGoal, notes, budgetEstimated, budgetNotes, participantsIfir, participantsSport, reportStatus, createdAt, updatedAt
        FROM "Event"
        ORDER BY startDate ASC, createdAt DESC`
     )
@@ -77,6 +79,7 @@ export function createEventRecord(input: {
   cfaScope: string
   status: string
   startDate: Date
+  durationDays: number | null
   endDate: Date | null
   location: string | null
   owner: string | null
@@ -95,9 +98,9 @@ export function createEventRecord(input: {
   database
     .prepare(
       `INSERT INTO "Event" (
-        id, title, eventType, cfaScope, status, startDate, endDate, location, owner, priority, mainGoal, notes, budgetEstimated, budgetNotes, participantsIfir, participantsSport, reportStatus, createdAt, updatedAt
+        id, title, eventType, cfaScope, status, startDate, durationDays, endDate, location, owner, priority, mainGoal, notes, budgetEstimated, budgetNotes, participantsIfir, participantsSport, reportStatus, createdAt, updatedAt
       ) VALUES (
-        ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+        ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
       )`
     )
     .run(
@@ -107,6 +110,7 @@ export function createEventRecord(input: {
       input.cfaScope,
       input.status,
       input.startDate.toISOString(),
+      input.durationDays,
       input.endDate?.toISOString() ?? null,
       input.location,
       input.owner,

@@ -1,6 +1,7 @@
-import type { ComponentType, ReactNode } from "react"
+import type { ComponentType } from "react"
 import type { Metadata } from "next"
 import { revalidatePath } from "next/cache"
+import { redirect } from "next/navigation"
 import {
   CalendarDays,
   CircleDollarSign,
@@ -12,6 +13,7 @@ import {
   Users,
 } from "lucide-react"
 
+import { CreateEventDrawer } from "@/components/events/create-event-drawer"
 import { createEventRecord, listEvents } from "@/lib/events-store"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -23,8 +25,6 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import {
   Table,
   TableBody,
@@ -33,7 +33,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { Textarea } from "@/components/ui/textarea"
 
 export const metadata: Metadata = {
   title: "Evenements",
@@ -75,36 +74,44 @@ const reportStatusOptions = [
   { value: "FAIT", label: "Fait" },
 ] as const
 
-export default async function EvenementsPage() {
+export default async function EvenementsPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ created?: string }>
+}) {
   const events = listEvents()
+  const params = await searchParams
+  const isCreated = params?.created === "1"
 
   async function createEvent(formData: FormData) {
     "use server"
+
+    const startDate = new Date(getRequiredString(formData, "startDate"))
+    const durationDays = getOptionalNumber(formData, "durationDays") ?? 1
+    const endDate = computeEndDate(startDate, durationDays)
 
     createEventRecord({
       title: getRequiredString(formData, "title"),
       eventType: getEnumValue(formData, "eventType", eventTypeOptions.map((option) => option.value)),
       cfaScope: getEnumValue(formData, "cfaScope", cfaScopeOptions.map((option) => option.value)),
       status: getEnumValue(formData, "status", statusOptions.map((option) => option.value)),
-      startDate: new Date(getRequiredString(formData, "startDate")),
-      endDate: getOptionalDate(formData, "endDate"),
+      startDate,
+      durationDays,
+      endDate,
       location: getOptionalString(formData, "location"),
       owner: null,
       priority: "MEDIUM",
-      mainGoal: getOptionalString(formData, "mainGoal"),
+      mainGoal: null,
       notes: getOptionalString(formData, "notes"),
       budgetEstimated: getOptionalNumber(formData, "budgetEstimated"),
       budgetNotes: getOptionalString(formData, "budgetNotes"),
       participantsIfir: getOptionalInteger(formData, "participantsIfir"),
       participantsSport: getOptionalInteger(formData, "participantsSport"),
-      reportStatus: getEnumValue(
-        formData,
-        "reportStatus",
-        reportStatusOptions.map((option) => option.value)
-      ),
+      reportStatus: "PAS_FAIT",
     })
 
     revalidatePath("/evenements")
+    redirect("/evenements?created=1")
   }
 
   return (
@@ -118,9 +125,22 @@ export default async function EvenementsPage() {
                 Vue de gestion dense pour creer, qualifier et suivre les evenements de la saison.
               </CardDescription>
             </div>
-            <CreateEventDrawer action={createEvent} />
+            <CreateEventDrawer
+              action={createEvent}
+              eventTypeOptions={eventTypeOptions}
+              cfaScopeOptions={cfaScopeOptions}
+              statusOptions={statusOptions}
+            />
           </CardHeader>
         </Card>
+
+        {isCreated ? (
+          <Card className="border border-emerald-200 bg-emerald-50/80 shadow-none">
+            <CardContent className="py-4 text-sm text-emerald-900">
+              Evenement cree avec succes.
+            </CardContent>
+          </Card>
+        ) : null}
 
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
           <div className="space-y-6">
@@ -186,7 +206,6 @@ export default async function EvenementsPage() {
                               <div className="font-medium">{event.title}</div>
                               <div className="flex flex-wrap gap-2">
                                 <Badge>{formatEventType(event.eventType)}</Badge>
-                                {event.mainGoal ? <Badge variant="outline">{event.mainGoal}</Badge> : null}
                               </div>
                               {event.notes ? (
                                 <p className="line-clamp-2 max-w-md text-sm text-muted-foreground">
@@ -198,7 +217,7 @@ export default async function EvenementsPage() {
                           <TableCell className="align-top text-sm">
                             <div>{formatSingleDate(event.startDate)}</div>
                             <div className="text-muted-foreground">
-                              {event.endDate ? formatSingleDate(event.endDate) : "Date unique"}
+                              {formatDurationDays(event.durationDays)}
                             </div>
                           </TableCell>
                           <TableCell className="align-top">
@@ -290,161 +309,6 @@ export default async function EvenementsPage() {
   )
 }
 
-function CreateEventDrawer({
-  action,
-}: {
-  action: (formData: FormData) => Promise<void>
-}) {
-  return (
-    <Sheet>
-      <SheetTrigger render={<Button className="w-full sm:w-auto" />}>
-        <Plus className="size-4" />
-        Nouvel evenement
-      </SheetTrigger>
-      <SheetContent side="right" className="w-full overflow-y-auto p-0 sm:max-w-xl">
-        <div className="border-b border-border/60 p-6">
-          <SheetTitle>Nouvel evenement</SheetTitle>
-          <SheetDescription>
-            Saisie rapide pour alimenter la vue de gestion sans alourdir le parcours.
-          </SheetDescription>
-        </div>
-
-        <form action={action} className="space-y-5 p-6">
-          <FormField label="Titre" htmlFor="title" required>
-            <Input id="title" name="title" placeholder="Ex. Salon Etudiant Lyon" required />
-          </FormField>
-
-          <div className="grid gap-4 sm:grid-cols-2">
-            <FormField label="Type" htmlFor="eventType" required>
-              <select
-                id="eventType"
-                name="eventType"
-                defaultValue="SALON"
-                className={selectClassName}
-                required
-              >
-                {eventTypeOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </FormField>
-
-            <FormField label="CFA" htmlFor="cfaScope" required>
-              <select
-                id="cfaScope"
-                name="cfaScope"
-                defaultValue="BOTH"
-                className={selectClassName}
-                required
-              >
-                {cfaScopeOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </FormField>
-          </div>
-
-          <div className="grid gap-4 sm:grid-cols-2">
-            <FormField label="Statut" htmlFor="status" required>
-              <select
-                id="status"
-                name="status"
-                defaultValue="VEILLE"
-                className={selectClassName}
-                required
-              >
-                {statusOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </FormField>
-
-            <FormField label="Bilan" htmlFor="reportStatus" required>
-              <select
-                id="reportStatus"
-                name="reportStatus"
-                defaultValue="PAS_FAIT"
-                className={selectClassName}
-                required
-              >
-                {reportStatusOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </FormField>
-          </div>
-
-          <div className="grid gap-4 sm:grid-cols-2">
-            <FormField label="Date debut" htmlFor="startDate" required>
-              <Input id="startDate" name="startDate" type="date" required />
-            </FormField>
-
-            <FormField label="Date fin" htmlFor="endDate">
-              <Input id="endDate" name="endDate" type="date" />
-            </FormField>
-          </div>
-
-          <FormField label="Lieu" htmlFor="location">
-            <Input id="location" name="location" placeholder="Ex. Lyon" />
-          </FormField>
-
-          <FormField label="Objectif principal" htmlFor="mainGoal">
-            <Input
-              id="mainGoal"
-              name="mainGoal"
-              placeholder="Ex. Generer des leads BTS NDRC"
-            />
-          </FormField>
-
-          <div className="grid gap-4 sm:grid-cols-2">
-            <FormField label="Budget estime" htmlFor="budgetEstimated">
-              <Input id="budgetEstimated" name="budgetEstimated" type="number" min="0" step="0.01" />
-            </FormField>
-
-            <FormField label="Note budget" htmlFor="budgetNotes">
-              <Input
-                id="budgetNotes"
-                name="budgetNotes"
-                placeholder="Ex. devis stand a confirmer"
-              />
-            </FormField>
-          </div>
-
-          <div className="grid gap-4 sm:grid-cols-2">
-            <FormField label="Participants IFIR" htmlFor="participantsIfir">
-              <Input id="participantsIfir" name="participantsIfir" type="number" min="0" step="1" />
-            </FormField>
-
-            <FormField label="Participants CFA Sport" htmlFor="participantsSport">
-              <Input id="participantsSport" name="participantsSport" type="number" min="0" step="1" />
-            </FormField>
-          </div>
-
-          <FormField label="Notes" htmlFor="notes">
-            <Textarea
-              id="notes"
-              name="notes"
-              placeholder="Points utiles, contexte, remarques terrain."
-            />
-          </FormField>
-
-          <Button type="submit" className="w-full">
-            Enregistrer l'evenement
-          </Button>
-        </form>
-      </SheetContent>
-    </Sheet>
-  )
-}
-
 function StatLine({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center justify-between rounded-2xl bg-muted/25 px-3 py-2">
@@ -454,39 +318,11 @@ function StatLine({ label, value }: { label: string; value: string }) {
   )
 }
 
-function InfoPill({
-  icon: Icon,
-  text,
-}: {
-  icon: ComponentType<{ className?: string }>
-  text: string
-}) {
+function InfoPill({ icon: Icon, text }: { icon: ComponentType<{ className?: string }>; text: string }) {
   return (
     <div className="flex items-center gap-2 rounded-2xl bg-muted/25 px-3 py-2">
       <Icon className="size-4" />
       <span>{text}</span>
-    </div>
-  )
-}
-
-function FormField({
-  label,
-  htmlFor,
-  required = false,
-  children,
-}: {
-  label: string
-  htmlFor: string
-  required?: boolean
-  children: ReactNode
-}) {
-  return (
-    <div className="space-y-2">
-      <Label htmlFor={htmlFor}>
-        {label}
-        {required ? <span className="text-muted-foreground">*</span> : null}
-      </Label>
-      {children}
     </div>
   )
 }
@@ -510,11 +346,6 @@ function getOptionalString(formData: FormData, key: string) {
 
   const trimmedValue = value.trim()
   return trimmedValue.length > 0 ? trimmedValue : null
-}
-
-function getOptionalDate(formData: FormData, key: string) {
-  const value = getOptionalString(formData, key)
-  return value ? new Date(value) : null
 }
 
 function getOptionalNumber(formData: FormData, key: string) {
@@ -571,6 +402,14 @@ function formatReportStatus(value: string) {
   return reportStatusOptions.find((option) => option.value === value)?.label ?? value
 }
 
+function formatDurationDays(value: number | null) {
+  if (!value) {
+    return "1 jour"
+  }
+
+  return `${String(value).replace(".", ",")} jour${value > 1 ? "s" : ""}`
+}
+
 function formatBudget(value: number | null) {
   if (value === null) {
     return "Non renseigne"
@@ -583,5 +422,12 @@ function formatBudget(value: number | null) {
   }).format(value)
 }
 
-const selectClassName =
-  "flex h-8 w-full rounded-2xl border border-transparent bg-input/50 px-2.5 py-1 text-sm transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/30"
+function computeEndDate(startDate: Date, durationDays: number) {
+  if (durationDays <= 1) {
+    return null
+  }
+
+  const endDate = new Date(startDate)
+  endDate.setDate(endDate.getDate() + Math.ceil(durationDays) - 1)
+  return endDate
+}
