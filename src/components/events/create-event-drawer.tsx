@@ -19,11 +19,13 @@ export function CreateEventDrawer({
   eventTypeOptions,
   cfaScopeOptions,
   statusOptions,
+  triggerClassName,
 }: {
   action: (formData: FormData) => Promise<void>
   eventTypeOptions: readonly Option[]
   cfaScopeOptions: readonly Option[]
   statusOptions: readonly Option[]
+  triggerClassName?: string
 }) {
   const [cfaScope, setCfaScope] = useState("BOTH")
 
@@ -32,7 +34,7 @@ export function CreateEventDrawer({
 
   return (
     <Sheet>
-      <SheetTrigger render={<Button className="w-full sm:w-auto" />}>
+      <SheetTrigger render={<Button className={triggerClassName ?? "w-full sm:w-auto"} />}>
         <Plus className="size-4" />
         Nouvel evenement
       </SheetTrigger>
@@ -127,7 +129,7 @@ export function CreateEventDrawer({
             </FormField>
 
             <FormField label="Note budget" htmlFor="budgetNotes">
-              <Input
+              <Textarea
                 id="budgetNotes"
                 name="budgetNotes"
                 placeholder="Ex. devis stand a confirmer"
