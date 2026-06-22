@@ -1,6 +1,5 @@
 import type { Metadata } from "next"
-import { revalidatePath } from "next/cache"
-import { redirect } from "next/navigation"
+import Link from "next/link"
 import {
   CalendarDays,
   Search,
@@ -9,7 +8,7 @@ import {
 
 import { listEvents } from "@/lib/events-store"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import {
   Card,
   CardContent,
@@ -70,11 +69,13 @@ const reportStatusOptions = [
 export default async function EvenementsPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ created?: string }>
+  searchParams?: Promise<{ created?: string; view?: string }>
 }) {
   const events = listEvents()
   const params = await searchParams
   const isCreated = params?.created === "1"
+  const currentView = params?.view === "calendar" ? "calendar" : "list"
+  const createdSuffix = isCreated ? "&created=1" : ""
 
   return (
     <>
@@ -92,14 +93,22 @@ export default async function EvenementsPage({
               <CardDescription>Recherche et filtres a brancher dans une prochaine iteration.</CardDescription>
             </div>
             <div className="inline-flex rounded-2xl bg-muted p-1 text-sm">
-              <span className="rounded-xl bg-white px-3 py-1.5 font-medium text-foreground shadow-sm">
+              <Link
+                href={`/evenements?view=list${createdSuffix}`}
+                className={`rounded-xl px-3 py-1.5 ${currentView === "list" ? "bg-white font-medium text-foreground shadow-sm" : "text-muted-foreground"}`}
+              >
                 Liste
-              </span>
-              <span className="px-3 py-1.5 text-muted-foreground">Calendrier a venir</span>
+              </Link>
+              <Link
+                href={`/evenements?view=calendar${createdSuffix}`}
+                className={`rounded-xl px-3 py-1.5 ${currentView === "calendar" ? "bg-white font-medium text-foreground shadow-sm" : "text-muted-foreground"}`}
+              >
+                Calendrier
+              </Link>
             </div>
           </div>
 
-          <div className="grid gap-3 xl:grid-cols-[minmax(0,1fr)_180px_180px_180px]">
+          <div className="grid gap-3 xl:grid-cols-[minmax(0,1fr)_150px_150px_170px_160px_170px]">
             <div className="relative">
               <Search className="pointer-events-none absolute top-2.5 left-3 size-4 text-muted-foreground" />
               <Input
@@ -108,16 +117,36 @@ export default async function EvenementsPage({
                 disabled
               />
             </div>
-            <Input value="Tous les statuts" disabled />
             <Input value="Tous les CFA" disabled />
+            <Input value="Tous les types" disabled />
+            <Input value="Toutes decisions" disabled />
+            <Input value="Toute periode" disabled />
+            <Input value="Tous les bilans" disabled />
+          </div>
+
+          <div className="flex flex-wrap gap-2">
             <Button variant="outline" className="justify-start">
               <SlidersHorizontal className="size-4" />
               Filtres a venir
             </Button>
+            <div className="rounded-2xl bg-muted/40 px-3 py-2 text-sm text-muted-foreground">
+              Recherche, CFA, type, decision, periode et bilan seront relies ensuite.
+            </div>
           </div>
         </CardHeader>
         <CardContent>
-          {events.length === 0 ? (
+          {currentView === "calendar" ? (
+            <div className="rounded-[24px] border border-dashed border-border/70 bg-muted/20 p-10">
+              <div className="flex items-center gap-2 text-sm font-medium">
+                <CalendarDays className="size-4" />
+                Vue calendrier
+              </div>
+              <p className="mt-3 max-w-2xl text-sm text-muted-foreground">
+                Cette vue affichera la saison par mois, les evenements proches et les alertes de
+                preparation. Elle remplace la table quand l&apos;onglet calendrier est actif.
+              </p>
+            </div>
+          ) : events.length === 0 ? (
             <div className="rounded-[24px] border border-dashed border-border/70 bg-muted/20 p-10 text-center">
               <p className="text-base font-medium">Aucun evenement enregistre</p>
               <p className="mt-2 text-sm text-muted-foreground">
@@ -128,16 +157,17 @@ export default async function EvenementsPage({
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Evenement</TableHead>
+                  <TableHead className="w-[26%]">Evenement</TableHead>
                   <TableHead>CFA</TableHead>
                   <TableHead>Type</TableHead>
                   <TableHead>Statut</TableHead>
                   <TableHead>Decision</TableHead>
                   <TableHead>Date</TableHead>
-                  <TableHead>Lieu / adresse</TableHead>
-                  <TableHead>Participants</TableHead>
-                  <TableHead>Budget</TableHead>
+                  <TableHead className="w-[18%]">Lieu / adresse</TableHead>
+                  <TableHead className="w-[12%]">Participants</TableHead>
+                  <TableHead className="w-[14%]">Budget</TableHead>
                   <TableHead>Bilan</TableHead>
+                  <TableHead className="text-right">Action</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -196,6 +226,14 @@ export default async function EvenementsPage({
                     </TableCell>
                     <TableCell className="align-top">
                       <Badge variant="outline">{formatReportStatus(event.reportStatus)}</Badge>
+                    </TableCell>
+                    <TableCell className="align-top text-right">
+                      <Link
+                        href={`/evenements/${event.id}`}
+                        className={buttonVariants({ variant: "outline", size: "sm" })}
+                      >
+                        Voir fiche
+                      </Link>
                     </TableCell>
                   </TableRow>
                 ))}

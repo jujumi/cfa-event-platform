@@ -31,3 +31,64 @@ Le dashboard V1 est conçu d’abord pour la communication.
 Le dashboard doit montrer les priorités d’organisation, les événements à arbitrer, le pipeline, les formations à pousser, la collecte de leads et le ROI rapide.
 Le dashboard ne doit pas être pensé d’abord comme une vue simplifiée pour les chargées de formation.
 La simplification par rôle sera traitée plus tard.
+
+# docs/DECISIONS.md — Ajout à faire
+
+# 2026-06-18 — Module Événements
+
+La page `/evenements` est une page de gestion détaillée, pas le dashboard global.
+
+Le dashboard `/` reste une synthèse des priorités, alertes, prochains événements, leads et indicateurs.
+
+Le module Événements utilise une logique de décision, statut et checklists.
+
+Valeurs de décision :
+
+* À étudier ;
+* Validé ;
+* Refusé ;
+* Annulé.
+
+Valeurs de statut événement :
+
+* À organiser ;
+* Organisé ;
+* Terminé.
+
+“Terminé” signifie que l’événement a eu lieu ou que sa date est passée.
+Cela ne signifie pas que le bilan ou le reporting sont terminés.
+
+La table courte `/evenements` doit afficher :
+
+* Décision ;
+* Statut ;
+* Événement ;
+* Date ;
+* Durée ;
+* Type ;
+* CFA ;
+* Lieu / adresse ;
+* Participants ;
+* Admin ;
+* Com ;
+* Orga ;
+* Complétion.
+
+Le budget, les notes longues, les notes budget et le reporting détaillé ne doivent pas apparaître dans la table courte.
+
+Ils doivent être accessibles dans la fiche événement ou les pages dédiées.
+
+La complétion affichée dans la table courte est un seul pourcentage.
+
+Avant l’événement, elle est calculée depuis les checklists Admin, Com et Orga.
+
+Après la date de l’événement, ou lorsque le statut est “Terminé”, elle est calculée depuis la checklist Bilan / Reporting.
+
+Les actions de ligne comme “Voir fiche” ne sont pas des colonnes métier triables ou filtrables.
+
+Deux templates de checklists sont prévus pour démarrer :
+
+* Salon / événement externe ;
+* JPO.
+
+Les checklists devront être éditables dans la fiche événement.

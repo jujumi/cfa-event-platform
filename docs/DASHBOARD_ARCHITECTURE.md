@@ -4,141 +4,166 @@
 
 ## Objectif du dashboard
 
-Le dashboard V1 est un poste de pilotage pour la communication.
+Le dashboard V1 est un poste de pilotage pour la communication et l’organisation événementielle.
 
 Il doit permettre de comprendre rapidement :
 
 * quels événements arrivent ;
-* lesquels sont à arbitrer ;
 * ce qui bloque ;
 * ce qui doit être préparé ;
+* quelles actions sont prioritaires ;
 * quelles formations pousser ;
 * quels supports prévoir ;
 * quels leads suivre ;
 * quels résultats analyser.
 
-Le dashboard n’est pas seulement un écran de statistiques.
-C’est un outil de pilotage opérationnel et stratégique.
+Le dashboard n’est pas la page de gestion détaillée des événements.
+
+La gestion détaillée se fait dans `/evenements`.
+
+Le dashboard doit être synthétique, orienté priorités et décisions.
 
 ## Public principal
 
 Le dashboard V1 est d’abord conçu pour la communication / pilotage événementiel.
 
-Une version simplifiée pour les chargées de formation pourra être créée plus tard.
+Il peut être consulté par la direction, les chargées de formation, la finance ou les équipes terrain.
+
+Une version simplifiée par rôle pourra être créée plus tard.
+
+## Différence entre dashboard et module Événements
+
+Le dashboard `/` affiche une synthèse :
+
+* alertes ;
+* prochains événements ;
+* indicateurs ;
+* priorités ;
+* raccourcis.
+
+Le module `/evenements` gère le détail :
+
+* table dense ;
+* filtres ;
+* calendrier ;
+* création ;
+* fiche événement ;
+* checklists ;
+* documents ;
+* reporting.
+
+Le dashboard ne doit pas dupliquer la page `/evenements`.
 
 ## Structure générale
 
 Le dashboard doit comporter :
 
-1. Barre de navigation latérale.
-2. Zone de filtres.
-3. Cartes de synthèse.
-4. Bloc actions prioritaires.
-5. Pipeline événements.
-6. Prochains événements.
-7. Formations à pousser.
-8. Collecte et parcours prospect.
-9. ROI / bilan rapide.
+1. Cartes de synthèse.
+2. Bloc actions prioritaires.
+3. Prochains événements.
+4. Pipeline ou vue d’avancement synthétique.
+5. Formations à pousser.
+6. Collecte et parcours prospect.
+7. ROI / bilan rapide.
+
+La navigation latérale, le header global, le titre de page et les actions principales sont gérés par l’AppShell, pas par le dashboard lui-même.
 
 ## Navigation latérale
 
 Navigation principale :
 
-* Dashboard
-* Événements
-* Documents
-* PLV / Kits
-* Formations
-* Leads
-* Landing pages
-* Reporting
-* Paramètres
-* Aide
+* Dashboard ;
+* Événements ;
+* Documents ;
+* PLV / Kits ;
+* Formations ;
+* Leads ;
+* Landing pages ;
+* Reporting ;
+* Paramètres ;
+* Aide.
 
-## Filtres en haut de page
+## AppShell
 
-Filtres utiles :
+L’AppShell doit fournir :
 
-* Saison.
-* CFA : IFIR, Sport, les deux.
-* Période.
-* Statut.
-* Type d’événement.
+* sidebar persistante ;
+* header global ;
+* titre de page ;
+* sous-titre ;
+* action principale ;
+* largeur de contenu cohérente ;
+* espacements globaux.
+
+Les pages internes ne doivent pas recréer leur propre shell.
 
 ## Cartes de synthèse
 
 Cartes proposées :
 
-* Événements à arbitrer.
-* Actions urgentes.
-* Salons validés.
-* Leads à relancer.
+* événements à étudier ;
+* actions urgentes ;
+* événements validés ;
+* leads à relancer.
 
-Ces cartes doivent servir à attirer l’attention sur les priorités, pas à faire du reporting détaillé.
+Ces cartes doivent attirer l’attention sur les priorités.
+Elles ne doivent pas remplacer le reporting détaillé.
 
 ## Bloc “À traiter en priorité”
 
-Ce bloc est essentiel.
+Ce bloc doit faire remonter les problèmes opérationnels :
 
-Il doit faire remonter les problèmes opérationnels :
-
-* devis en attente ;
-* PLV à vérifier ;
+* événement sans date confirmée ;
+* événement validé mais préparation incomplète ;
+* checklist Admin bloquée ;
+* checklist Com bloquée ;
+* checklist Orga bloquée ;
 * landing page manquante ;
-* formulaire JPO à refaire ;
-* brief équipe non prêt ;
-* document manquant ;
-* événement sans objectif ;
-* événement sans formation prioritaire ;
-* événement sans responsable ;
-* bilan non rempli.
+* QR code manquant ;
+* PLV à vérifier ;
+* participants internes non confirmés ;
+* bilan / reporting non rempli après événement.
 
 L’objectif est de savoir immédiatement quoi traiter.
 
-## Pipeline événements
+## Pipeline / avancement événements
 
-Le pipeline doit montrer les événements par statut.
+Le dashboard peut afficher une vue d’avancement synthétique, mais il ne doit pas recréer toute la table `/evenements`.
 
-Colonnes envisagées :
+La logique d’avancement doit s’appuyer sur :
 
-* Veille.
-* À arbitrer.
-* Devis demandé.
-* Validé.
-* À préparer.
+* décision ;
+* statut événement ;
+* complétion ;
+* checklists Admin, Com, Orga ;
+* checklist Bilan / Reporting après événement.
+
+Valeurs de décision :
+
+* À étudier ;
+* Validé ;
+* Refusé ;
+* Annulé.
+
+Valeurs de statut :
+
+* À organiser ;
+* Organisé ;
 * Terminé.
-* Bilan à faire.
-
-Pour le premier mockup, on peut réduire les colonnes à :
-
-* Veille.
-* À arbitrer.
-* Validé.
-* À préparer.
-* Terminé.
-
-Chaque carte événement doit idéalement afficher :
-
-* nom ;
-* date ;
-* lieu ;
-* type ;
-* CFA concerné ;
-* statut ou alerte courte.
 
 ## Prochains événements
 
-Liste ou tableau des prochains événements avec :
+Liste ou tableau synthétique des prochains événements avec :
 
 * date ;
 * événement ;
 * type ;
 * lieu ;
-* statut ;
-* responsable ;
-* prochaine action.
+* CFA concerné ;
+* complétion ;
+* prochaine action ou alerte.
 
-Ce bloc doit être plus opérationnel que stratégique.
+Ce bloc doit être plus opérationnel que décoratif.
 
 ## Formations à pousser
 
@@ -196,7 +221,8 @@ Le reporting détaillé aura sa propre page.
 
 Le dashboard ne doit pas devenir trop complexe dès le départ.
 
-La V1 peut afficher des placeholders structurés, mais l’architecture doit déjà refléter le futur produit.
+Il doit rester une synthèse utile.
 
-Il faut éviter un dashboard générique avec des cartes inutiles.
 Chaque bloc doit correspondre à une décision ou une action réelle.
+
+Éviter les cartes génériques qui ne changent pas les priorités de travail.
